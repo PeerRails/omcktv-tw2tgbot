@@ -1,4 +1,4 @@
-class RedisClient
+class RedOni
   def initialize(url)
     @url = url
   end
@@ -11,12 +11,24 @@ class RedisClient
     client.set("tweet_#{id}", 'true')
   end
 
+  def set_last_tweet(id)
+    client.set("last_tweet", id)
+  end
+
+  def get_last_tweet(id)
+    client.get("last_tweet")
+  end
+
   def set_owner(name)
     client.set("tguser_#{name}", "owner")
   end
 
   def get_owner(name)
-    client.set("tguser_#{name}")
+    client.get("tguser_#{name}")
+  end
+
+  def remove_owner(name)
+    client.set("tguser_#{name}", nil)
   end
 
   def store_chat(chat_id)
@@ -24,7 +36,15 @@ class RedisClient
   end
 
   def get_chat(chat_id)
-    client.set("char_#{chat_id}")
+    client.get("char_#{chat_id}")
+  end
+
+  def remove_chat(chat_id)
+    client.set("char_#{chat_id}", nil)
+  end
+
+  def get_chats
+    client.lrange("chats", 0, 0)
   end
 
   private

@@ -1,4 +1,4 @@
-class LiveTwee
+class BlueOni
   def initialize(consumer_key, consumer_secret, access_token, access_token_secret)
     @consumer_key =  consumer_key
     @consumer_secret = consumer_secret
@@ -16,6 +16,10 @@ class LiveTwee
 
   def get_tweet(id)
     client.status(id)
+  end
+
+  def post_tweet(text)
+    client.update(text)
   end
 
   private
