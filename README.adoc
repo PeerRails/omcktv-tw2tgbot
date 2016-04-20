@@ -1,0 +1,19 @@
+= OmckTV Twitter Forwarder
+
+A little pet project to embrace Telegram Bot API. +
+WARNING: Not stable or for general use!
+
+.Requirements
+* Ruby >1.9
+* Redis >2.8
+* Twitter Account API Tokens
+* Bot API Token
+
+.How to install
+* Clone repo
+* ----bundle install----
+* Copy .env.example to .env
+* Paste API tokens and Redis URL to .env
+* Run ----ruby app.rb----
+* ???
+* Enjoy!
