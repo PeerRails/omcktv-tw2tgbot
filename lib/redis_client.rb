@@ -8,6 +8,7 @@ class RedOni
   end
 
   def set_tweet_key(id)
+    p "Saving tweet_#{id}"
     client.set("tweet_#{id}", 'true')
   end
 
@@ -28,10 +29,11 @@ class RedOni
   end
 
   def remove_owner(name)
-    client.set("tguser_#{name}", nil)
+    client.del("tguser_#{name}")
   end
 
   def store_chat(chat_id)
+    client.lpush "chats", chat_id
     client.set("chat_#{chat_id}", "true")
   end
 
@@ -40,7 +42,8 @@ class RedOni
   end
 
   def remove_chat(chat_id)
-    client.set("char_#{chat_id}", nil)
+    client.del("char_#{chat_id}")
+    client.lrem(chats, -2, chat_id)
   end
 
   def get_chats

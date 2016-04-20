@@ -1,18 +1,16 @@
 require 'twitter'
 require 'telegram/bot'
 require "redis"
-require 'daemons'
 require 'dotenv'
 require 'logger'
 require_relative 'lib/livetwee'
 require_relative 'lib/redis_client'
 require_relative 'lib/tg_bot'
 
-TGLOG = Logger.new('log/telegram.log')
-TWILOG = Logger.new('log/twitter.log')
-PWD = File.dirname(__FILE__)
+TGLOG = Logger.new(File.dirname(__FILE__) + '/log/telegram.log')
+TWILOG = Logger.new(File.dirname(__FILE__) + '/log/twitter.log')
 
-Dotenv.load
+Dotenv.load(File.dirname(__FILE__) + '/.env')
 BOTTOKEN = ENV['TG_BOT_API_TOKEN']
 
 def red_oni
@@ -36,22 +34,27 @@ end
 def listen_chat
   Telegram::Bot::Client.run(BOTTOKEN) do |bot|
     bot.listen do |message|
-      TGLOG.info("Command #{command} with #{message.chat.id}")
+      TGLOG.info("Command #{message.text} with #{message.chat.id}")
       case message.text
       when '/start'
-        bot.api.send_message(chat_id: message.chat.id, text: "Привет! Добавляю ща чатик в список рассылки")
-        red_oni.store_chat(message.chat.id)
+        p red_oni.get_chat(message.chat.id)
+        if red_oni.get_chat(message.chat.id).nil?
+          bot.api.send_message(chat_id: message.chat.id, text: "Привет! Добавляю ща чатик в список рассылки")
+          red_oni.store_chat(message.chat.id)
+        end
       when '/purge'
-        bot.api.send_message(chat_id: message.chat.id, text: "Лан, пока, удаляю из списка рассылки")
-        red_oni.remove_chat(message.chat.id)
+        unless red_oni.get_chat(message.chat.id).nil?
+          bot.api.send_message(chat_id: message.chat.id, text: "Лан, пока, удаляю из списка рассылки")
+          red_oni.remove_chat(message.chat.id)
+        end
       when '/tweet'
         bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
       when '/last_tweet'
-        tweet = blue_oni.get_timeline("omcktv").first.url
-        bot.api.send_message(chat_id: message.chat.id, text: tweet)
+        tweet = blue_oni.get_timeline("omcktv").first
+        bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
       when '/last_mention'
-        tweet = blue_oni.get_mentions.first.url
-        bot.api.send_message(chat_id: message.chat.id, text: tweet)
+        tweet = blue_oni.get_mentions.first
+        bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
       end
     end
   end
@@ -65,7 +68,7 @@ def listen_twitter
       chats = red_oni.get_chats
       if red_oni.get_tweet_key(tweet.id).nil?
         chats.each do |chat|
-          bot.api.send_message(chat_id: chat, text: tweet.url)
+          bot.api.send_message(chat_id: chat, text: "#{tweet.full_text} #{tweet.url}")
           TWILOG.info("Sending tweet #{tweet.id} to #{chat}")
         end
         red_oni.set_tweet_key(tweet.id)
@@ -74,42 +77,20 @@ def listen_twitter
       end
       if red_oni.get_tweet_key(mention.id).nil?
         chats.each do |chat|
-          bot.api.send_message(chat_id: chat, text: tweet.url)
-          TWILOG.info("Sending tweet #{tweet.id} to #{chat}")
+          bot.api.send_message(chat_id: chat, text: "#{mention.full_text} #{mention.url}")
+          TWILOG.info("Sending tweet #{mention.id} to #{chat}")
         end
-        red_oni.set_tweet_key(tweet.id)
-        TWILOG.info("Saving tweet #{tweet.id} to Redis")
+        red_oni.set_tweet_key(mention.id)
+        TWILOG.info("Saving mention #{mention.id} to Redis")
       end
+      break
     end
     sleep(60)
   }
 end
 
-def daemonize_rb
-  opts = {
-    :app_name => 'omcktwitterbot',
-    :log => PWD + "/logs",
-    :dir => PWD + "/logs",
-    :log_output => true,
-    :monitor => true,
-    :keep_pid_files => true,
-    :multiple => true
-  }
-  puts "Starting Daemons!"
-  task1 = Daemons.call(opts) do
-    # first server task
-
-    listen_chat()
-  end
-
-  task2 = Daemons.call do
-    listen_twitter
-  end
-
-  task1.stop
-  task2.stop
-
-  exit
-end
-
 init()
+t1 = Thread.new { listen_chat() }
+t2 = Thread.new { listen_twitter() }
+t1.join
+t2.join
