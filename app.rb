@@ -3,6 +3,7 @@ require 'telegram/bot'
 require "redis"
 require 'dotenv'
 require 'logger'
+require 'twitter-text'
 require_relative 'lib/livetwee'
 require_relative 'lib/redis_client'
 require_relative 'lib/tg_bot'
@@ -55,6 +56,16 @@ def listen_chat
       when '/last_mention'
         tweet = blue_oni.get_mentions.first
         bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
+      when /hug/i
+        reciever = message.text[/(\@[a-zA-Z0-9_]+)/]
+        reciever = message.from.first_name if reciever.nil?
+        p "обнимашки #{reciever}"
+        bot.api.send_message(chat_id: message.chat.id, text: "Обнял #{reciever} ༼ つ ◕_◕ ༽つ")
+      when /kappa/i
+        reciever = message.text[/(\@[a-zA-Z0-9_]+)/]
+        reciever = message.from.first_name if reciever.nil?
+        p "обнимашки #{reciever.inspect} \n #{message.text}"
+        bot.api.send_message(chat_id: message.chat.id, text: "༼ つ ͡ ͡° ͜ ʖ ͡ ͡° ༽つ #{reciever} ლ(́◉◞౪◟◉‵ლ)")
       end
     end
   end
