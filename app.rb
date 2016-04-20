@@ -37,31 +37,31 @@ def listen_chat
     bot.listen do |message|
       TGLOG.info("Command #{message.text} with #{message.chat.id}")
       case message.text
-      when '/start'
+      when /^\/start/
         p red_oni.get_chat(message.chat.id)
         if red_oni.get_chat(message.chat.id).nil?
           bot.api.send_message(chat_id: message.chat.id, text: "Привет! Добавляю ща чатик в список рассылки")
           red_oni.store_chat(message.chat.id)
         end
-      when '/purge'
+      when /^\/purge/i
         unless red_oni.get_chat(message.chat.id).nil?
           bot.api.send_message(chat_id: message.chat.id, text: "Лан, пока, удаляю из списка рассылки")
           red_oni.remove_chat(message.chat.id)
         end
-      when '/tweet'
+      when /^\/tweet/i
         bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
-      when '/last_tweet'
+      when /^\/last_tweet/i
         tweet = blue_oni.get_timeline("omcktv").first
         bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
-      when '/last_mention'
+      when /^\/last_mention/i
         tweet = blue_oni.get_mentions.first
         bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
-      when /hug/i
+      when /^\/hug/i
         reciever = message.text[/(\@[a-zA-Z0-9_]+)/]
         reciever = message.from.first_name if reciever.nil?
         p "обнимашки #{reciever}"
         bot.api.send_message(chat_id: message.chat.id, text: "Обнял #{reciever} ༼ つ ◕_◕ ༽つ")
-      when /kappa/i
+      when /^\/kappa/i
         reciever = message.text[/(\@[a-zA-Z0-9_]+)/]
         reciever = message.from.first_name if reciever.nil?
         p "обнимашки #{reciever.inspect} \n #{message.text}"
