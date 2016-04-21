@@ -38,16 +38,16 @@ class RedOni
   end
 
   def get_chat(chat_id)
-    client.get("char_#{chat_id}")
+    client.get("chat_#{chat_id}")
   end
 
   def remove_chat(chat_id)
-    client.del("char_#{chat_id}")
-    client.lrem(chats, -2, chat_id)
+    client.del("chat_#{chat_id}")
+    client.lrem("chats", -1, chat_id)
   end
 
   def get_chats
-    client.lrange("chats", 0, 0)
+    client.lrange("chats", 0, -1)
   end
 
   private

@@ -38,34 +38,33 @@ def listen_chat
       TGLOG.info("Command #{message.text} with #{message.chat.id}")
       case message.text
       when /^\/start/
-        p red_oni.get_chat(message.chat.id)
         if red_oni.get_chat(message.chat.id).nil?
           bot.api.send_message(chat_id: message.chat.id, text: "Привет! Добавляю ща чатик в список рассылки")
           red_oni.store_chat(message.chat.id)
         end
-      when /^\/purge/i
+      when /^\/purge/
         unless red_oni.get_chat(message.chat.id).nil?
-          bot.api.send_message(chat_id: message.chat.id, text: "Лан, пока, удаляю из списка рассылки")
+          bot.api.send_message(chat_id: message.chat.id, text: "Лан, удаляю из списка рассылки")
           red_oni.remove_chat(message.chat.id)
         end
-      when /^\/tweet/i
-        bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
-      when /^\/last_tweet/i
+      #when /^\/tweet/
+        #bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
+      when /^\/last_tweet/
         tweet = blue_oni.get_timeline("omcktv").first
         bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
-      when /^\/last_mention/i
+      when /^\/last_mention/
         tweet = blue_oni.get_mentions.first
         bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
       when /^\/hug/i
-        reciever = message.text[/(\@[a-zA-Z0-9_]+)/]
+        reciever = message.text[/ (\@[a-zA-Z0-9_]+)/]
         reciever = message.from.first_name if reciever.nil?
-        p "обнимашки #{reciever}"
-        bot.api.send_message(chat_id: message.chat.id, text: "Обнял #{reciever} ༼ つ ◕_◕ ༽つ")
-      when /^\/kappa/i
-        reciever = message.text[/(\@[a-zA-Z0-9_]+)/]
+        bot.api.send_message(chat_id: message.chat.id, text: "༼ つ ◕_◕ ༽つ\nОбнял #{reciever}")
+      when /^\/kappa/
+        reciever = message.text[/ (\@[a-zA-Z0-9_]+)/]
         reciever = message.from.first_name if reciever.nil?
-        p "обнимашки #{reciever.inspect} \n #{message.text}"
-        bot.api.send_message(chat_id: message.chat.id, text: "༼ つ ͡ ͡° ͜ ʖ ͡ ͡° ༽つ #{reciever} ლ(́◉◞౪◟◉‵ლ)")
+        bot.api.send_message(chat_id: message.chat.id, text: "```༼ つ ͡ ͡° ͜ ʖ ͡ ͡° ༽つ``` #{reciever}")
+      else
+        message = nil
       end
     end
   end
@@ -77,6 +76,7 @@ def listen_twitter
       tweet = blue_oni.get_timeline("omcktv").first
       mention = blue_oni.get_mentions.first
       chats = red_oni.get_chats
+      TGLOG.info(chats.inspect)
       if red_oni.get_tweet_key(tweet.id).nil?
         chats.each do |chat|
           bot.api.send_message(chat_id: chat, text: "#{tweet.full_text} #{tweet.url}")
@@ -101,7 +101,8 @@ def listen_twitter
 end
 
 init()
-t1 = Thread.new { listen_chat() }
-t2 = Thread.new { listen_twitter() }
-t1.join
-t2.join
+#t1 = Thread.new { listen_chat() }
+#t2 = Thread.new { listen_twitter() }
+#t1.join
+#t2.join
+listen_chat()
