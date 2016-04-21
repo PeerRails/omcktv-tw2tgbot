@@ -36,6 +36,7 @@ def listen_chat
   Telegram::Bot::Client.run(BOTTOKEN) do |bot|
     bot.listen do |message|
       TGLOG.info("Command #{message.text} with #{message.chat.id}")
+      p message.inspect
       case message.text
       when /^\/start/
         if red_oni.get_chat(message.chat.id).nil?
@@ -50,7 +51,7 @@ def listen_chat
       when /^\/posttweet/
         bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
       when /^\/notavailable/
-        bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
+        bot.api.send_sticker(chat_id: message.chat.id, sticker: "BQADAgADCwADGuNyCWFvP04VyxHBAg")
       when /^\/last_tweet/
         tweet = blue_oni.get_timeline("omcktv").first
         bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
@@ -64,7 +65,14 @@ def listen_chat
       when /^\/kappa/
         reciever = message.text[/ (\@[a-zA-Z0-9_]+)/]
         reciever = message.from.first_name if reciever.nil?
-        bot.api.send_message(chat_id: message.chat.id, text: "```༼ つ ͡ ͡° ͜ ʖ ͡ ͡° ༽つ``` #{reciever}")
+        bot.api.send_message(chat_id: message.chat.id, text: "༼ つ ͡ ͡° ͜ ʖ ͡ ͡° ༽つ #{reciever}")
+      when /\/yaranaika/
+        bot.api.sendSticker(chat_id: message.chat.id, sticker: "BQADAQADAwIAAoRmZwS3q19CWFJchQI")
+      when /\/bigguy/
+        reciever = message.text[/ (\@[a-zA-Z0-9_]+)/]
+        reciever = message.from.first_name if reciever.nil?
+        bot.api.send_message(chat_id: message.chat.id, text: "А ты большой парень, #{reciever}")
+        bot.api.sendSticker(chat_id: message.chat.id, sticker: "BQADAgAD5wADiyYxB3PBKrw8lWzeAg")
       else
         message = nil
       end
@@ -102,7 +110,8 @@ def listen_twitter
 end
 
 init()
-t1 = Thread.new { listen_chat() }
-t2 = Thread.new { listen_twitter() }
-t1.join
-t2.join
+#t1 = Thread.new { listen_chat() }
+#t2 = Thread.new { listen_twitter() }
+#t1.join
+#t2.join
+listen_chat()
