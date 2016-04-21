@@ -47,8 +47,10 @@ def listen_chat
           bot.api.send_message(chat_id: message.chat.id, text: "Лан, удаляю из списка рассылки")
           red_oni.remove_chat(message.chat.id)
         end
-      #when /^\/tweet/
-        #bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
+      when /^\/posttweet/
+        bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
+      when /^\/notavailable/
+        bot.api.send_message(chat_id: message.chat.id, text: "Пока недоступно")
       when /^\/last_tweet/
         tweet = blue_oni.get_timeline("omcktv").first
         bot.api.send_message(chat_id: message.chat.id, text: "#{tweet.full_text} #{tweet.url}")
@@ -76,7 +78,6 @@ def listen_twitter
       tweet = blue_oni.get_timeline("omcktv").first
       mention = blue_oni.get_mentions.first
       chats = red_oni.get_chats
-      TGLOG.info(chats.inspect)
       if red_oni.get_tweet_key(tweet.id).nil?
         chats.each do |chat|
           bot.api.send_message(chat_id: chat, text: "#{tweet.full_text} #{tweet.url}")
@@ -91,8 +92,8 @@ def listen_twitter
           bot.api.send_message(chat_id: chat, text: "#{mention.full_text} #{mention.url}")
           TWILOG.info("Sending tweet #{mention.id} to #{chat}")
         end
-        red_oni.set_tweet_key(mention.id)
         TWILOG.info("Saving mention #{mention.id} to Redis")
+        red_oni.set_tweet_key(mention.id)
       end
       break
     end
@@ -105,4 +106,3 @@ t1 = Thread.new { listen_chat() }
 t2 = Thread.new { listen_twitter() }
 t1.join
 t2.join
-#listen_chat()
