@@ -36,14 +36,13 @@ def listen_chat
   Telegram::Bot::Client.run(BOTTOKEN) do |bot|
     bot.listen do |message|
       TGLOG.info("Command #{message.text} with #{message.chat.id}")
-      p message.inspect
-      case message.text
+      case message.text.downcase
       when /^\/start/
         if red_oni.get_chat(message.chat.id).nil?
           bot.api.send_message(chat_id: message.chat.id, text: "Привет! Добавляю ща чатик в список рассылки")
           red_oni.store_chat(message.chat.id)
         end
-      when /^\/purge/
+      when /^\/purgetheheretics/
         unless red_oni.get_chat(message.chat.id).nil?
           bot.api.send_message(chat_id: message.chat.id, text: "Лан, удаляю из списка рассылки")
           red_oni.remove_chat(message.chat.id)
