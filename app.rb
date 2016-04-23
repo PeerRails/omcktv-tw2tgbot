@@ -110,8 +110,8 @@ def listen_twitter
 end
 
 init()
-#t1 = Thread.new { listen_chat() }
-#t2 = Thread.new { listen_twitter() }
-#t1.join
-#t2.join
-listen_chat()
+t1 = Thread.new { listen_chat() }
+t2 = Thread.new { listen_twitter() }
+t1.join
+t2.join
+#listen_chat()
